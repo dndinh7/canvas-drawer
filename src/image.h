@@ -1,9 +1,6 @@
-/*-----------------------------------------------
- * Author:
- * Date:
- * Description:
- ----------------------------------------------*/
+// Copyright 2021, Aline Normoyle, alinen
 
+// Note that I removed the fill method, since I did not implement it
 
 #ifndef AGL_IMAGE_H_
 #define AGL_IMAGE_H_
@@ -18,9 +15,9 @@ namespace agl {
  * 
  */
 struct Pixel {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
 };
 
 /**
@@ -38,7 +35,7 @@ class Image {
   /** 
    * @brief Load the given filename 
    * @param filename The file to load, relative to the running directory
-   * @param flip Whether the file should flipped vertally when loaded
+   * @param flip Whether the file should flipped vertically when loaded
    * 
    * @verbinclude sprites.cpp
    */
@@ -64,7 +61,21 @@ class Image {
    *
    * Data will have size width * height * 4 (RGB)
    */
-  char* data() const;
+  unsigned char* data() const;
+
+  /**
+   * @brief Returns the total bytes of the image
+   * 
+   * Size: width * height * 3
+  */
+  int bytes() const;
+
+  /**
+   * @brief Returns the total pixels of the image
+   * 
+   * Size: width * height
+  */
+ int pixelCount() const;
 
   /**
    * @brief Replace image RGB data
@@ -95,7 +106,7 @@ class Image {
   void set(int row, int col, const Pixel& color);
 
   /**
- * @brief Set the pixel RGB color at index i
+ * @brief Get the pixel RGB color at index i
  * @param i The index (value between 0 and width * height)
  *
  * Pixel colors are unsigned char, e.g. in range 0 to 255
@@ -110,7 +121,6 @@ class Image {
  */
   void set(int i, const Pixel& c);
 
-
   // resize the image
   Image resize(int width, int height) const;
 
@@ -120,6 +130,8 @@ class Image {
   // flip around the vertical midline
   Image flipVertical() const;
 
+  Image flipPositiveDiagonal() const;
+
   // rotate the Image 90 degrees
   Image rotate90() const;
 
@@ -128,7 +140,10 @@ class Image {
 
   // Replace the portion starting at (row, col) with the given image
   // Clamps the image if it doesn't fit on this image
-  void replace(const Image& image, int x, int y);
+  // NOTE: startx corresponds to the COL position
+  //       starty corresponds to the ROW position
+  // starting from the top left is (0, 0)
+  void replace(const Image& image, int startx, int starty);
 
   // swirl the colors 
   Image swirl() const;
@@ -184,17 +199,81 @@ class Image {
   // Convert the image to grayscale
   Image grayscale() const;
 
-  // return a bitmap version of this image
+  // Jitters the colors
+  // Parameter size is the size x size cell we 
+  // apply the jitter to 
   Image colorJitter(int size) const;
 
   // return a bitmap version of this image
+  // note that the bits will be a square of size by size
+  // except the right and bottom if the dimensions
+  // of the image are not divisible by size
   Image bitmap(int size) const;
 
-  // Fill this image with a color
-  void fill(const Pixel& c);
+  // Checks if the args row and col are in the range and if myData is not nullptr
+  void inImageCheck(int row, int col) const;
 
- private:
-   // todo
+  /**
+   * Convolute: applies a kernel to the image
+   * @Parameters:
+   * kernel: an n by n sized matrix 
+   * kernelScale: is what the matrix is scaled by 
+   * sideLength: n length
+  */
+  Image convolute(int kernel[], float kernelScale, int sideLength) const;
+
+  // Sharpens image using kernels
+  Image sharpen() const;
+
+  // Identity image using kernel
+  Image identity() const;
+
+  // Applies a 3x3 Gaussian Blur
+  Image gaussianBlur() const;
+
+  // Applies a Box Blur
+  Image boxBlur() const;
+
+  // Ridge Detection
+  Image ridgeDetection() const;
+
+  // Unsharp Masking
+  Image unsharpMasking() const;
+
+  // Sobel operator
+  Image sobel() const;
+
+  // Extract all pixels that have values above the low pixel's rgb values
+  // and below the high pixel's rgb values (all channels must be between those values)
+  Image extract(const Pixel& low, const Pixel& high) const;
+
+  // Extract red channel 
+  Image extractRed() const;
+
+  // Extract green channel
+  Image extractGreen() const;
+
+  // Extract blue channel
+  Image extractBlue() const;
+
+  // GridCopy will copy the current image and paste it in a m x n grid
+  Image gridCopy(int m, int n) const;
+
+  // This will glow pixels that are extracted in the range low and high
+  Image glow(const Pixel& low, const Pixel& high) const;
+
+  // This will replace and do an alpha blend
+  void replaceAlpha(const Image& other, float alpha, int startx, int starty);
+
+  // This will replace the color at the coordinate x,y
+  void replaceColor(int x, int y, Pixel p);
+
+  private:
+    int myWidth;
+    int myHeight;
+    unsigned char* myData;
+    int totalBytes;
+    int totalPixels;
 };
 }  // namespace agl
 #endif  // AGL_IMAGE_H_

@@ -13,7 +13,14 @@
 
 namespace agl
 {
+   struct Point {
+      int x;
+      int y;
+      Pixel color;
+   };
+
    enum PrimitiveType {UNDEFINED, LINES, TRIANGLES};
+
    class Canvas
    {
    public:
@@ -36,7 +43,7 @@ namespace agl
       void begin(PrimitiveType type);
       void end();
 
-      // Specifiy a vertex at raster position (x,y)
+      // Specify a vertex at raster position (x,y)
       // x corresponds to the column; y to the row
       void vertex(int x, int y);
 
@@ -46,8 +53,22 @@ namespace agl
       // Fill the canvas with the given background color
       void background(unsigned char r, unsigned char g, unsigned char b);
 
+      // Bresenham's line algorithm
+      void drawLine(const Point& p1, const Point& p2);
+
+      // Interpolates pixel colors with a given alpha
+      static Pixel interpolateColor(const Pixel& p1, const Pixel& p2, float alpha);
+
    private:
+      // Helper functions for drawLine, so that they can 
+      // use _canvas without passing it as a parameter
+      void _drawLineLow(const Point& p1, const Point& p2);
+      void _drawLineHigh(const Point& p1, const Point& p2);
+
       Image _canvas;
+      PrimitiveType currentType;
+      Pixel currentColor;
+      std::vector<Point> myPoints;
    };
 }
 
