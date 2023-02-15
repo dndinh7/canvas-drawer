@@ -65,7 +65,8 @@ void Canvas::_drawLineHigh(const Point& p1, const Point& p2)
    }
    int F= 2*W - H;
    for (int y= p1.y; y <= p2.y; y++) {
-      this->_canvas.replaceColor(x, y, Canvas::interpolateColor(p1.color, p2.color, 0.5f));
+      Pixel newColor= Canvas::interpolateColor(p1.color, p2.color, (float) y/p2.y);
+      this->_canvas.replaceColor(x, y, newColor);
       if (F > 0) {
         x+= dx;
         F+= 2*(W - H);
@@ -90,7 +91,9 @@ void Canvas::_drawLineLow(const Point& p1, const Point& p2)
    }
    int F= 2*H - W;
    for (int x= p1.x; x <= p2.x; x++) {
-      this->_canvas.replaceColor(x, y, Canvas::interpolateColor(p1.color, p2.color, 0.5f));
+      // interpolates color based on x ratio to the end 
+      Pixel newColor= Canvas::interpolateColor(p1.color, p2.color, (float) x/p2.x);
+      this->_canvas.replaceColor(x, y, newColor);
       if (F > 0) {
         y+= dy;
         F+= 2*(H-W);
