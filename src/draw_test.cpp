@@ -75,7 +75,7 @@ int main(int argc, char** argv)
    drawer.vertex(100, 100);
    drawer.end();
    drawer.save("line-boxes.png");
-   /*
+   
    // test triangle with interpolation
    drawer.background(0, 0, 0);
    drawer.begin(TRIANGLES);
@@ -88,6 +88,7 @@ int main(int argc, char** argv)
    drawer.end();
    drawer.save("triangle.png");
 
+
    // test triangle with interpolation
    drawer.background(0, 0, 0);
    drawer.begin(TRIANGLES);
@@ -96,13 +97,16 @@ int main(int argc, char** argv)
    drawer.vertex(10, 90);
    drawer.vertex(90, 90);
 
+
    drawer.color(255, 255, 0);
    drawer.vertex(90, 90);
    drawer.vertex(90, 10);
    drawer.vertex(10, 10);
    drawer.end();
    drawer.save("quad.png");
-   */
+   
+
+   
 
    return 0;
 }

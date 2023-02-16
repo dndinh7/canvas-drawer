@@ -1,7 +1,9 @@
 /*-----------------------------------------------
- * Author:
- * Date:
- * Description:
+ * Author: David Dinh
+ * Date: 16 February 2023
+ * Description: This program allows the user
+ * to create their own canvas and currently
+ * draw lines and triangles.
  ----------------------------------------------*/
 
 #ifndef canvas_H_
@@ -56,8 +58,33 @@ namespace agl
       // Bresenham's line algorithm
       void drawLine(const Point& p1, const Point& p2);
 
+      // Draws a triangle from three points, this might
+      // change the parameters (which will be cleared anyway if drawn)
+      void drawTriangle(Point& p0, Point& p1, Point& p2);
+
       // Interpolates pixel colors with a given alpha
       static Pixel interpolateColor(const Pixel& p1, const Pixel& p2, float alpha);
+
+      /* Computes if the otherPt is on the same line as the two points or not.
+       * Returns a positive number if the otherPt is above the line
+       * and a negative number if the otherPt is below the line
+      */
+      static int implicitLineFunction(const Point& linePt1, const Point& linePt2,
+       const Point& otherPt);
+
+      /**
+       * Finds the box that bounds the vector of given points.
+       * The values will be returned in the passed references.
+       */
+      static void findBoundingBox(const Point& p0, const Point& p1, const Point& p2,
+        int& x_min, int& y_min, int& x_max, int& y_max);
+
+      /**
+       * This method rearranges the points, so that
+       * p0 -> p1 -> p2 goes in CCW orientation.
+       * 
+      */
+      static void rearrangeCCW(Point& p0, Point& p1, Point& p2);
 
    private:
       // Helper functions for drawLine, so that they can 
