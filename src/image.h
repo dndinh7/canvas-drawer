@@ -106,10 +106,10 @@ class Image {
   void set(int row, int col, const Pixel& color);
 
   /**
- * @brief Get the pixel RGB color at index i
- * @param i The index (value between 0 and width * height)
- *
- * Pixel colors are unsigned char, e.g. in range 0 to 255
+   * @brief Get the pixel RGB color at index i
+   * @param i The index (value between 0 and width * height)
+   *
+   * Pixel colors are unsigned char, e.g. in range 0 to 255
  */
   Pixel get(int i) const;
 

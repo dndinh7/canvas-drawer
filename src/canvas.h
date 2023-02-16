@@ -67,10 +67,12 @@ namespace agl
 
       /* Computes if the otherPt is on the same line as the two points or not.
        * Returns a positive number if the otherPt is above the line
-       * and a negative number if the otherPt is below the line
+       * and a negative number if the otherPt is below the line.
+       * I chose to do it in this style, so it can take offscreen floating points
       */
-      static int implicitLineFunction(const Point& linePt1, const Point& linePt2,
-       const Point& otherPt);
+      static float implicitLineFn(float linePt1_x, float linePt1_y, 
+         float linePt2_x, float linePt2_y, 
+         float otherPt_x, float otherPt_y);
 
       /**
        * Finds the box that bounds the vector of given points.

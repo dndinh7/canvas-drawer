@@ -1,5 +1,6 @@
 #include "canvas.h"
 #include <cassert>
+#include <cmath>
 #include <stdio.h>
 #include <string.h>
 
@@ -82,7 +83,7 @@ void Canvas::_drawLineHigh(const Point& p1, const Point& p2)
    }
    int F= 2*W - H;
    for (int y= p1.y; y <= p2.y; y++) {
-      Pixel newColor= Canvas::interpolateColor(p1.color, p2.color, (float) y/p2.y);
+      Pixel newColor= Canvas::interpolateColor(p1.color, p2.color, (float) (y-p1.y)/p2.y);
       this->_canvas.replaceColor(x, y, newColor);
       if (F > 0) {
         x+= dx;
@@ -109,7 +110,7 @@ void Canvas::_drawLineLow(const Point& p1, const Point& p2)
    int F= 2*H - W;
    for (int x= p1.x; x <= p2.x; x++) {
       // interpolates color based on x ratio to the end 
-      Pixel newColor= Canvas::interpolateColor(p1.color, p2.color, (float) x/p2.x);
+      Pixel newColor= Canvas::interpolateColor(p1.color, p2.color, (float) (x - p1.x)/p2.x);
       this->_canvas.replaceColor(x, y, newColor);
       if (F > 0) {
         y+= dy;
@@ -138,7 +139,9 @@ void Canvas::drawLine(const Point& p1, const Point& p2) {
 
 void Canvas::vertex(int x, int y)
 {
-  this->myPoints.push_back(Point { x, y, this->currentColor });
+  // clips vertex to image sizes
+  this->myPoints.push_back(Point { max(min(x, this->_canvas.width()-1), 0), 
+    max(min(y, this->_canvas.height()-1), 0), this->currentColor });
 }
 
 void Canvas::color(unsigned char r, unsigned char g, unsigned char b)
@@ -167,11 +170,13 @@ Pixel Canvas::interpolateColor(const Pixel& p1, const Pixel& p2, float alpha)
   return result;
 }
 
-int Canvas::implicitLineFunction(const Point& linePt1, const Point& linePt2, const Point& otherPt) 
+float Canvas::implicitLineFn(float linePt1_x, float linePt1_y, 
+  float linePt2_x, float linePt2_y,
+  float otherPt_x, float otherPt_y) 
 {
-  int H= linePt2.y - linePt1.y;
-  int W= linePt2.x - linePt1.x;
-  return H * (otherPt.x - linePt1.x) - W * (otherPt.y - linePt1.y);
+  int H= linePt2_y - linePt1_y;
+  int W= linePt2_x - linePt1_x;
+  return H * (otherPt_x - linePt1_x) - W * (otherPt_y - linePt1_y);
 }
 
 void Canvas::findBoundingBox(const Point& p0, const Point& p1, const Point& p2,
@@ -208,35 +213,26 @@ void Canvas::drawTriangle(Point& p0, Point& p1, Point& p2) {
 
   Canvas::rearrangeCCW(p0, p1, p2);
 
-  int f_alpha= this->implicitLineFunction(p1, p2, p0);
-  int f_beta= this->implicitLineFunction(p2, p0, p1);
-  int f_gamma= this->implicitLineFunction(p0, p1, p2);
-
-  cout << f_alpha << " " << f_beta << " " << f_gamma << endl;
+  float f_alpha= this->implicitLineFn(p1.x, p1.y, p2.x, p2.y, p0.x, p0.y);
+  float f_beta= this->implicitLineFn(p2.x, p2.y, p0.x, p0.y, p1.x, p1.y);
+  float f_gamma= this->implicitLineFn(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 
   // point to determine if an edge is part of the respective triangle
-  Point offPoint {-1, -1, Pixel{0, 0, 0}}; 
+  float offPoint_x= -1.1f;
+  float offPoint_y= -1.2f; 
 
   for (int y= y_min; y <= y_max; y++) {
     for (int x= x_min; x <= x_max; x++) {
-      Point curPoint {x, y, Pixel {0, 0, 0}};
-      float alpha= (float) this->implicitLineFunction(p1, p2, curPoint) / f_alpha;
-      float beta= (float) this->implicitLineFunction(p2, p0, curPoint) / f_beta;
-      float gamma= (float) this->implicitLineFunction(p0, p1, curPoint) / f_gamma;
-      if (x == 10 && y == 0) {
-        cout << p0.x << ", " << p0.y << " | " << p1.x << ", " << p1.y << " | " << p2.x << ", " << p2.y << endl;
-        cout << alpha << " " << beta << " " << gamma << endl;
-        cout << this->implicitLineFunction(p1, p2, offPoint) << endl;
-        cout << this->implicitLineFunction(p2, p0, offPoint) << endl;
-        cout << this->implicitLineFunction(p0, p1, offPoint) << endl;
-      }
+      float alpha= this->implicitLineFn(p1.x, p1.y, p2.x, p2.y, (float) x, (float) y) / f_alpha;
+      float beta= this->implicitLineFn(p2.x, p2.y, p0.x, p0.y, (float) x, (float) y) / f_beta;
+      float gamma= this->implicitLineFn(p0.x, p0.y, p1.x, p1.y, (float) x, (float) y) / f_gamma;
       if (alpha >= 0 && beta >= 0 && gamma >= 0) {
         // this either checks if the point is inside the triangle or on an edge
         // if it is an edge, we check it with the offscreen point to see if the
         // edge should be part of this triangle
-        if ((alpha > 0 || f_alpha * this->implicitLineFunction(p1, p2, offPoint) > 0)
-        && (beta > 0 || f_beta * this->implicitLineFunction(p2, p0, offPoint) > 0)
-        && (gamma > 0 || f_gamma * this->implicitLineFunction(p0, p1, offPoint) > 0))
+        if ((alpha > 0 || f_alpha * this->implicitLineFn(p1.x, p1.y, p2.x, p2.y, offPoint_x, offPoint_y) > 0)
+        && (beta > 0 || f_beta * this->implicitLineFn(p2.x, p2.y, p0.x, p0.y, offPoint_x, offPoint_y) > 0)
+        && (gamma > 0 || f_gamma * this->implicitLineFn(p0.x, p0.y, p1.x, p1.y, offPoint_x, offPoint_y) > 0))
         {
           Pixel newColor= Pixel{0, 0, 0};
           newColor.r= alpha * p0.color.r + beta * p1.color.r + gamma * p2.color.r;

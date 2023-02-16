@@ -16,7 +16,7 @@ void test_line(Canvas& drawer, int ax, int ay, int bx, int by, const std::string
 
 int main(int argc, char** argv)
 {
-   Canvas drawer(101, 101);
+   Canvas drawer(100, 100);
 
    drawer.color(255, 255, 255);
    test_line(drawer, 0, 50, 100, 50, "horizontal-line.png");
@@ -106,7 +106,36 @@ int main(int argc, char** argv)
    drawer.save("quad.png");
    
 
+   // test a quad with interpolation
+   drawer.background(0, 0, 0);
+   drawer.begin(TRIANGLES);
+   drawer.color(0, 0, 0);
+   drawer.vertex(5, 5);
+   drawer.color(255, 255, 255);
+   drawer.vertex(95, 95);
+   drawer.color(255, 0, 0);
+   drawer.vertex(95, 5);
    
+   drawer.vertex(5, 95);
+   drawer.color(0, 0, 0);
+   drawer.vertex(95, 95);
+   drawer.color(255, 255, 255);
+   drawer.vertex(5, 5);
+   drawer.end();
+   drawer.save("quad-interpolate.png");
+
+   // test vertex outside of image size
+   drawer.background(255, 255, 255);
+   drawer.begin(LINES);
+   drawer.color(0, 0, 0);
+   drawer.vertex(-35, 50);
+   drawer.vertex(50, 186);
+   
+   drawer.vertex(160, -100);
+   drawer.vertex(-100, 400);
+   drawer.end();
+   drawer.save("lines-out-of-bounds.png");
+
 
    return 0;
 }
