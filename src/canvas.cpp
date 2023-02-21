@@ -7,6 +7,7 @@
 using namespace std;
 using namespace agl;
 
+
 /**
  * This implements the corresponding methods
  * to rasterize lines and triangles.
@@ -27,7 +28,8 @@ void Canvas::save(const std::string& filename)
 
 void Canvas::begin(PrimitiveType type)
 {
-   this->currentType= type;
+  // should not be beginning a new type before ending...
+  this->currentType= type;
 }
 
 void Canvas::end()
@@ -64,6 +66,10 @@ void Canvas::end()
         this->drawTriangle(p0, p1, p2);
       }
       break;
+    case CIRCLES:
+      for (Point p: this->myPoints) {
+        this->drawCircle(p);
+      }
   }
   this->currentType= UNDEFINED;
   this->myPoints.clear();
@@ -140,8 +146,10 @@ void Canvas::drawLine(const Point& p1, const Point& p2) {
 void Canvas::vertex(int x, int y)
 {
   // clips vertex to image sizes
-  this->myPoints.push_back(Point { max(min(x, this->_canvas.width()-1), 0), 
-    max(min(y, this->_canvas.height()-1), 0), this->currentColor });
+  this->myPoints.push_back(Point {max(min(x, this->_canvas.width()-1), 0), 
+    max(min(y, this->_canvas.height()-1), 0), this->currentColor, this->currentLineWidth, this->currentRadius } );
+  
+  
 }
 
 void Canvas::color(unsigned char r, unsigned char g, unsigned char b)
@@ -149,6 +157,11 @@ void Canvas::color(unsigned char r, unsigned char g, unsigned char b)
   this->currentColor.r= r;
   this->currentColor.g= g;
   this->currentColor.b= b;
+}
+
+void Canvas::radius(int r) 
+{
+  this->currentRadius= r;
 }
 
 void Canvas::background(unsigned char r, unsigned char g, unsigned char b)
@@ -245,6 +258,24 @@ void Canvas::drawTriangle(Point& p0, Point& p1, Point& p2) {
 
     }
   } 
+}
+
+void Canvas::drawCircle(const Point& p)
+{
+  const int NUM_POINTS=100;
+  float deltaTheta= 2*M_PI/NUM_POINTS;
+  int radius= p.r;
+  int xOffset= p.x;
+  int yOffset= p.y;
+
+  for (float theta= 0.0f; theta < 2 * M_PI - deltaTheta; theta+= deltaTheta) {
+    Point p1 {xOffset + (int) ceil(radius * cos(theta)), yOffset + (int) ceil(radius * sin(theta)), 
+      p.color, p.lineWidth, radius };
+    Point p2 {xOffset + (int) ceil(radius * cos(theta + deltaTheta)), 
+      yOffset + (int) ceil(radius * sin(theta + deltaTheta)),
+      p.color, p.lineWidth, radius };
+    this->drawLine(p1, p2);
+  }
 
 
 }

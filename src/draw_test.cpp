@@ -136,6 +136,14 @@ int main(int argc, char** argv)
    drawer.end();
    drawer.save("lines-out-of-bounds.png");
 
+   // draw circle
+   drawer.background(255, 255, 255);
+   drawer.begin(CIRCLES);
+   drawer.color(0, 0, 0);
+   drawer.radius(25);
+   drawer.vertex(50, 50);
+   drawer.end();
+   drawer.save("circle.png");
 
    return 0;
 }

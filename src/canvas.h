@@ -19,9 +19,11 @@ namespace agl
       int x;
       int y;
       Pixel color;
+      int lineWidth;
+      int r;
    };
 
-   enum PrimitiveType {UNDEFINED, LINES, TRIANGLES};
+   enum PrimitiveType {UNDEFINED, LINES, TRIANGLES, CIRCLES};
 
    class Canvas
    {
@@ -48,6 +50,12 @@ namespace agl
       // Specify a vertex at raster position (x,y)
       // x corresponds to the column; y to the row
       void vertex(int x, int y);
+
+      // Specify a circle's radius
+      void radius(int r);
+
+      // Specify a width
+      void width(int w);
 
       // Specify a color. Color components are in range [0,255]
       void color(unsigned char r, unsigned char g, unsigned char b);
@@ -88,6 +96,12 @@ namespace agl
       */
       static void rearrangeCCW(Point& p0, Point& p1, Point& p2);
 
+      /**
+       * Draws a circle at point p (this point object should be CirclePoint)
+      */
+      void drawCircle(const Point& p);
+
+
    private:
       // Helper functions for drawLine, so that they can 
       // use _canvas without passing it as a parameter
@@ -98,6 +112,8 @@ namespace agl
       PrimitiveType currentType;
       Pixel currentColor;
       std::vector<Point> myPoints;
+      int currentRadius= 1;
+      int currentLineWidth= 1;
    };
 }
 
