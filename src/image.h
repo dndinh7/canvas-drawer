@@ -268,6 +268,12 @@ class Image {
   // This will replace the color at the coordinate x,y
   void replaceColor(int x, int y, Pixel p);
 
+  // This will add the color to the pixel
+  void addColor(int x, int y, Pixel p);
+
+  // This will interpolate the pixel color at x, y
+  void alphaColor(int x, int y, Pixel p, float alpha);
+
   private:
     int myWidth;
     int myHeight;

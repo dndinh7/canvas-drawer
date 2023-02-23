@@ -15,6 +15,10 @@
 
 namespace agl
 {
+  enum BlendType { ALPHA, ADD, REPLACE };
+
+  enum PrimitiveType {UNDEFINED, LINES, TRIANGLES, CIRCLES, ROSE, FLOW};
+
   struct Point {
     int x;
     int y;
@@ -35,8 +39,6 @@ namespace agl
     int step_length;
   };
 
-  enum PrimitiveType {UNDEFINED, LINES, TRIANGLES, CIRCLES, ROSE, FLOW};
-
   class Canvas
   {
   public:
@@ -56,7 +58,10 @@ namespace agl
     //    vertex(0, 0);
     //    vertex(0,100);
     // end();
-    void begin(PrimitiveType type);
+    void begin(PrimitiveType primitiveType, BlendType blendType= REPLACE, float alpha= 0.0f);
+
+    // This will draw the shapes, then clear the vectors, and reset
+    // the primitive type back to UNDEFINED and blendType back to REPLACE
     void end();
 
     // Specify a vertex at raster position (x,y)
@@ -66,8 +71,8 @@ namespace agl
     // Specify a circle's radius
     void radius(int r);
 
-    // Specify a width
-    void width(int w);
+    // Specify a line width
+    void lineWidth(int w);
 
     // Specify number of petals
     void petals(int num);
@@ -134,16 +139,22 @@ namespace agl
     void _drawLineLow(const Point& p1, const Point& p2);
     void _drawLineHigh(const Point& p1, const Point& p2);
 
+    // This will color the pixel at x and y
+    // based on the blend type
+    void _colorPixel(int x, int y, const Pixel& p);
+
     Image _canvas;
-    PrimitiveType currentType;
+    PrimitiveType currentPrimitiveType= UNDEFINED;
     Pixel currentColor;
     std::vector<Point> myPoints;
     std::vector<int> myRadii;     // determines the radius of circle points
     std::vector<int> myNumPetals; // determines number of petals
     FlowField flowField;
+    BlendType currentBlendType= REPLACE;
     int currentRadius= 1;
     int currentLineWidth= 1;
     int currentNumPetals= 1;
+    float currentAlpha= 0.0f;
 
   };
 }

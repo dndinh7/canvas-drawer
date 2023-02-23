@@ -18,6 +18,20 @@ int clamp(int value, int low, int hi) {
   return std::min(std::max(value, low), hi);
 }
 
+void Canvas::_colorPixel(int x, int y, const Pixel& p) {
+  switch (this->currentBlendType) {
+    case REPLACE:
+      this->_canvas.replaceColor(x, y, p);
+      break;
+    case ADD:
+      this->_canvas.addColor(x, y, p);
+      break;
+    case ALPHA:
+      this->_canvas.alphaColor(x, y, p, this->currentAlpha);
+      break;
+  }
+}
+
 Canvas::Canvas(int w, int h) : _canvas(w, h)
 {
   // Allow for a 50% buffer if lines were to loop back
@@ -40,16 +54,16 @@ Canvas::Canvas(int w, int h) : _canvas(w, h)
   this->flowField.field= std::vector<float>(this->flowField.nRows * 
     this->flowField.nCols);
 
-  float angle= 0.25f * M_PI;
 
   for (int y= 0; y < this->flowField.nRows; y++) {
     for (int x= 0; x < this->flowField.nCols; x++) {
+      float angle= (y / float(this->flowField.nRows)) * M_PI;
       this->flowField.field[y * this->flowField.nCols + x]= angle;
     }
   }
 
   this->flowField.numSteps= (int) (this->_canvas.height() * 0.5);
-  this->flowField.step_length= (int) (this->_canvas.width() * 0.005);
+  this->flowField.step_length= (int) (this->_canvas.width() * 0.01);
 }
 
 Canvas::~Canvas()
@@ -58,19 +72,22 @@ Canvas::~Canvas()
 
 void Canvas::save(const std::string& filename)
 {
-   _canvas.save(filename);
+  _canvas.save(filename);
 }
 
-void Canvas::begin(PrimitiveType type)
+void Canvas::begin(PrimitiveType primitiveType, BlendType blendType, float alpha)
 {
-  // should not be beginning a new type before ending...
-  this->currentType= type;
+  // should not be calling begin before ending
+  assert(this->currentPrimitiveType == UNDEFINED);
+  this->currentPrimitiveType= primitiveType;
+  this->currentBlendType= blendType;
+  this->currentAlpha= alpha;
 }
 
 void Canvas::end()
 {
   int n= this->myPoints.size();
-  switch (this->currentType) {
+  switch (this->currentPrimitiveType) {
     case UNDEFINED:
       std::cout << "Should not be drawing in UNDEFINED mode" << std::endl;
       break;
@@ -125,7 +142,8 @@ void Canvas::end()
       }
       break;
   }
-  this->currentType= UNDEFINED;
+  this->currentPrimitiveType= UNDEFINED;
+  this->currentBlendType= REPLACE;
   this->myPoints.clear();
   this->myRadii.clear();
   this->myNumPetals.clear();
@@ -146,7 +164,7 @@ void Canvas::_drawLineHigh(const Point& p1, const Point& p2)
    int F= 2*W - H;
    for (int y= p1.y; y <= p2.y; y++) {
       Pixel newColor= Canvas::interpolateColor(p1.color, p2.color, (float) (y-p1.y)/p2.y);
-      this->_canvas.replaceColor(x, y, newColor);
+      this->_colorPixel(x, y, newColor);
       if (F > 0) {
         x+= dx;
         F+= 2*(W - H);
@@ -173,7 +191,7 @@ void Canvas::_drawLineLow(const Point& p1, const Point& p2)
    for (int x= p1.x; x <= p2.x; x++) {
       // interpolates color based on x ratio to the end 
       Pixel newColor= Canvas::interpolateColor(p1.color, p2.color, (float) (x - p1.x)/p2.x);
-      this->_canvas.replaceColor(x, y, newColor);
+      this->_colorPixel(x, y, newColor);
       if (F > 0) {
         y+= dy;
         F+= 2*(H-W);
@@ -220,14 +238,19 @@ void Canvas::drawLine(Point& p1, Point& p2) {
 void Canvas::vertex(int x, int y)
 {
   // clips vertex to image sizes
-  this->myPoints.push_back(Point {clamp(x, 0, this->_canvas.width()-1), 
-    clamp(y, 0, this->_canvas.height()-1), this->currentColor, this->currentLineWidth} );
+  Point p;
+  p.x= clamp(x, 0, this->_canvas.width()-1);
+  p.y= clamp(y, 0, this->_canvas.height()-1);
+  p.color= this->currentColor;
+  p.lineWidth= this->currentLineWidth;
   
-  if (this->currentType == CIRCLES || this->currentType == ROSE) {
+  this->myPoints.push_back(p);
+  
+  if (this->currentPrimitiveType == CIRCLES || this->currentPrimitiveType == ROSE) {
     this->myRadii.push_back(this->currentRadius);
   }
 
-  if (this->currentType == ROSE) {
+  if (this->currentPrimitiveType == ROSE) {
     this->myNumPetals.push_back(this->currentNumPetals);
   }
 }
@@ -247,6 +270,11 @@ void Canvas::radius(int r)
 void Canvas::petals(int num)
 {
   this->currentNumPetals= num;
+}
+
+void Canvas::lineWidth(int w) 
+{
+  this->currentLineWidth= w;
 }
 
 void Canvas::background(unsigned char r, unsigned char g, unsigned char b)
@@ -337,7 +365,7 @@ void Canvas::drawTriangle(Point& p0, Point& p1, Point& p2) {
           newColor.g= alpha * p0.color.g + beta * p1.color.g + gamma * p2.color.g;
           newColor.b= alpha * p0.color.b + beta * p1.color.b + gamma * p2.color.b;
 
-          this->_canvas.replaceColor(x, y, newColor);
+          this->_colorPixel(x, y, newColor);
         }
       }
 

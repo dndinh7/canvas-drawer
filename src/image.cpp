@@ -269,8 +269,29 @@ void Image::replace(const Image& image, int startx, int starty) {
   }  
 }
 
-void Image::replaceColor(int x, int y, Pixel pixel) {
+void Image::replaceColor(int x, int y, Pixel pixel)
+{
   this->set(y, x, pixel);
+}
+
+void Image::addColor(int x, int y, Pixel pixel) 
+{
+  Pixel p= this->get(y, x);
+  p.r= clamp(pixel.r + p.r, 0, 255);
+  p.g= clamp(pixel.g + p.g, 0, 255);
+  p.b= clamp(pixel.b + p.b, 0, 255);
+  this->set(y, x, p);
+}
+
+void Image::alphaColor(int x, int y, Pixel pixel, float alpha) {
+  Pixel blendedPixel {0, 0, 0};
+  Pixel p1= this->get(y, x);
+
+  blendedPixel.r= (float) p1.r * (1 - alpha) + (float) pixel.r * alpha;
+  blendedPixel.g= (float) p1.g * (1 - alpha) + (float) pixel.g * alpha;
+  blendedPixel.b= (float) p1.b * (1 - alpha) + (float) pixel.b * alpha;
+
+  this->set(y, x, blendedPixel);
 }
 
 void Image::replaceAlpha(const Image& other, float alpha, int startx, int starty) {
@@ -782,6 +803,8 @@ Image Image::convolute(int kernel[], float kernelScale, int sideLength) const {
 Image Image::glow(const Pixel& low, const Pixel& high) const {
   return this->add(this->extract(low, high).boxBlur());
 }
+
+
 
 
 }  // namespace agl
