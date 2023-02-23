@@ -145,5 +145,24 @@ int main(int argc, char** argv)
    drawer.end();
    drawer.save("circle.png");
 
+   // draw 8 petal rose
+   drawer.background(255, 255, 255);
+   drawer.begin(ROSE);
+   drawer.color(0,0,0);
+   drawer.radius(25);
+   drawer.petals(4);
+   drawer.vertex(50, 50);
+   drawer.end();
+   drawer.save("8-petal.png");
+
+   drawer.background(255, 255, 255);
+   drawer.begin(ROSE);
+   drawer.color(0,0,0);
+   drawer.radius(25);
+   drawer.petals(5);
+   drawer.vertex(50, 50);
+   drawer.end();
+   drawer.save("5-petal.png");
+
    return 0;
 }

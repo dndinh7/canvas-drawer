@@ -20,10 +20,9 @@ namespace agl
       int y;
       Pixel color;
       int lineWidth;
-      int r;
    };
 
-   enum PrimitiveType {UNDEFINED, LINES, TRIANGLES, CIRCLES};
+   enum PrimitiveType {UNDEFINED, LINES, TRIANGLES, CIRCLES, ROSE};
 
    class Canvas
    {
@@ -57,6 +56,9 @@ namespace agl
       // Specify a width
       void width(int w);
 
+      // Specify number of petals
+      void petals(int num);
+
       // Specify a color. Color components are in range [0,255]
       void color(unsigned char r, unsigned char g, unsigned char b);
 
@@ -64,7 +66,7 @@ namespace agl
       void background(unsigned char r, unsigned char g, unsigned char b);
 
       // Bresenham's line algorithm
-      void drawLine(const Point& p1, const Point& p2);
+      void drawLine(Point& p1, Point& p2);
 
       // Draws a triangle from three points, this might
       // change the parameters (which will be cleared anyway if drawn)
@@ -97,9 +99,14 @@ namespace agl
       static void rearrangeCCW(Point& p0, Point& p1, Point& p2);
 
       /**
-       * Draws a circle at point p (this point object should be CirclePoint)
+       * Draws a circle at point p
       */
-      void drawCircle(const Point& p);
+      void drawCircle(const Point& p, int radius);
+
+      /**
+       * Draws a rose at point p
+      */
+     void drawRose(const Point& p, int radius, int numPetals);
 
 
    private:
@@ -112,8 +119,13 @@ namespace agl
       PrimitiveType currentType;
       Pixel currentColor;
       std::vector<Point> myPoints;
+      std::vector<int> myRadii;
+      std::vector<int> myNumPetals;
+      std::vector<float> flowField;
       int currentRadius= 1;
       int currentLineWidth= 1;
+      int currentNumPetals= 1;
+
    };
 }
 

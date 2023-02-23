@@ -13,8 +13,20 @@ using namespace agl;
  * to rasterize lines and triangles.
 */
 
+// Function to clamp value
+int clamp(int value, int low, int hi) {
+  return std::min(std::max(value, low), hi);
+}
+
 Canvas::Canvas(int w, int h) : _canvas(w, h)
 {
+  this->flowField= std::vector<float>(w*h);
+  for (int i= 0; i < this->_canvas.width(); i++) {
+    for (int j= 0; j < this->_canvas.height(); i++) {
+      
+    }
+  }
+
 }
 
 Canvas::~Canvas()
@@ -42,7 +54,6 @@ void Canvas::end()
     case LINES:
       if (n % 2 != 0) {
         std::cout << "(NO DRAW) There are an odd number of vertices declared" << std::endl;
-        this->myPoints.clear();
         break;
       }
 
@@ -55,7 +66,6 @@ void Canvas::end()
     case TRIANGLES:
       if (n % 3 != 0) {
         std::cout << "(NO DRAW) There are not a multiple of three vertices declared." << std::endl;
-        this->myPoints.clear();
         break;
       }
 
@@ -67,12 +77,29 @@ void Canvas::end()
       }
       break;
     case CIRCLES:
-      for (Point p: this->myPoints) {
-        this->drawCircle(p);
+      if (n != this->myRadii.size()) {
+        std::cout << "(NO DRAW) Not a vector of circle points" << std::endl;
+        break;
       }
+      for (int i= 0; i < n; i++) {
+        this->drawCircle(this->myPoints[i], this->myRadii[i]);
+      }
+      break;
+    case ROSE:
+      if (n != this->myRadii.size() || n != this->myNumPetals.size()) {
+        std::cout << "(NO DRAW) Not a vector of rose points" << std::endl;
+        break;
+      }
+
+      for (int i= 0; i < n; i++) {
+        this->drawRose(this->myPoints[i], this->myRadii[i], this->myNumPetals[i]);
+      }
+      break;
   }
   this->currentType= UNDEFINED;
   this->myPoints.clear();
+  this->myRadii.clear();
+  this->myNumPetals.clear();
 }
 
 // drawLine helper function for when |H| > |W|
@@ -127,28 +154,53 @@ void Canvas::_drawLineLow(const Point& p1, const Point& p2)
    }
 }
 
-void Canvas::drawLine(const Point& p1, const Point& p2) {
-   int W= p2.x - p1.x;
-   int H= p2.y - p1.y;
+void Canvas::drawLine(Point& p1, Point& p2) {
+  int W= p2.x - p1.x;
+  int H= p2.y - p1.y;
 
-   if (std::abs(H) < std::abs(W)) {
-      // swap, so we go in the positive x-direction
-      if (p1.x > p2.x) this->_drawLineLow(p2, p1);
-      else this->_drawLineLow(p1, p2);
-   } else {
-      // swap, so we go in the positive y-direction
-      if (p1.y > p2.y) this->_drawLineHigh(p2, p1);
-      else this->_drawLineHigh(p1, p2);
-   }
+  int canvasWidth= this->_canvas.width()-1;
+  int canvasHeight= this->_canvas.height()-1;
+
+  if ((p1.x < 0 && p2.x < 0) ||
+    (p1.y < 0 && p2.y < 0) ||
+    (p1.x > canvasWidth && p2.x > canvasWidth) ||
+    (p1.y > canvasHeight && p2.y > canvasHeight)) {
+      // do not want to draw a line that is completely off the screen
+      return;
+    }
+
+  p1.x= clamp(p1.x, 0, canvasWidth);
+  p1.y= clamp(p1.y, 0, canvasHeight);
+  p2.x= clamp(p2.x, 0, canvasWidth);
+  p2.y= clamp(p2.y, 0, canvasHeight);
+
+  // so that we can draw to the boundaries if the point
+  // is off the screen
+
+  if (std::abs(H) < std::abs(W)) {
+    // swap, so we go in the positive x-direction
+    if (p1.x > p2.x) this->_drawLineLow(p2, p1);
+    else this->_drawLineLow(p1, p2);
+  } else {
+    // swap, so we go in the positive y-direction
+    if (p1.y > p2.y) this->_drawLineHigh(p2, p1);
+    else this->_drawLineHigh(p1, p2);
+  }
 }
-
 
 void Canvas::vertex(int x, int y)
 {
   // clips vertex to image sizes
-  this->myPoints.push_back(Point {max(min(x, this->_canvas.width()-1), 0), 
-    max(min(y, this->_canvas.height()-1), 0), this->currentColor, this->currentLineWidth, this->currentRadius } );
+  this->myPoints.push_back(Point {clamp(x, 0, this->_canvas.width()-1), 
+    clamp(y, 0, this->_canvas.height()-1), this->currentColor, this->currentLineWidth} );
   
+  if (this->currentType == CIRCLES || this->currentType == ROSE) {
+    this->myRadii.push_back(this->currentRadius);
+  }
+
+  if (this->currentType == ROSE) {
+    this->myNumPetals.push_back(this->currentNumPetals);
+  }
   
 }
 
@@ -164,12 +216,17 @@ void Canvas::radius(int r)
   this->currentRadius= r;
 }
 
+void Canvas::petals(int num)
+{
+  this->currentNumPetals= num;
+}
+
 void Canvas::background(unsigned char r, unsigned char g, unsigned char b)
 {
-   Pixel p {r, g, b};
-   for (int i= 0; i < this->_canvas.pixelCount(); i++) {
-      this->_canvas.set(i, p);
-   }
+  Pixel p {r, g, b};
+  for (int i= 0; i < this->_canvas.pixelCount(); i++) {
+    this->_canvas.set(i, p);
+  }
 }
 
 Pixel Canvas::interpolateColor(const Pixel& p1, const Pixel& p2, float alpha) 
@@ -260,22 +317,39 @@ void Canvas::drawTriangle(Point& p0, Point& p1, Point& p2) {
   } 
 }
 
-void Canvas::drawCircle(const Point& p)
+void Canvas::drawCircle(const Point& p, int radius)
 {
   const int NUM_POINTS=100;
   float deltaTheta= 2*M_PI/NUM_POINTS;
-  int radius= p.r;
+  int xOffset= p.x;
+  int yOffset= p.y;
+
+  for (float theta= 0.1f; theta < 2 * M_PI + 0.1f; theta+= deltaTheta) {
+    Point p1 {xOffset + (int) ceil(radius * cos(theta)), yOffset + (int) ceil(radius * sin(theta)), 
+      p.color, p.lineWidth};
+    Point p2 {xOffset + (int) ceil(radius * cos(theta + deltaTheta)), 
+      yOffset + (int) ceil(radius * sin(theta + deltaTheta)),
+      p.color, p.lineWidth};
+    this->drawLine(p1, p2);
+  }
+}
+
+void Canvas::drawRose(const Point& p, int radius, int numPetals) {
+  const int NUM_POINTS= 100;
+  float deltaTheta= 2*M_PI/NUM_POINTS;
   int xOffset= p.x;
   int yOffset= p.y;
 
   for (float theta= 0.0f; theta < 2 * M_PI - deltaTheta; theta+= deltaTheta) {
-    Point p1 {xOffset + (int) ceil(radius * cos(theta)), yOffset + (int) ceil(radius * sin(theta)), 
-      p.color, p.lineWidth, radius };
-    Point p2 {xOffset + (int) ceil(radius * cos(theta + deltaTheta)), 
-      yOffset + (int) ceil(radius * sin(theta + deltaTheta)),
-      p.color, p.lineWidth, radius };
+    float r_cur= radius * cos(theta*numPetals);
+    float r_next= radius * cos((theta+deltaTheta)*numPetals);
+
+    Point p1 {xOffset + (int) (r_cur * cos(theta)), yOffset + 
+    (int) (r_cur * sin(theta)), p.color, p.lineWidth};
+    Point p2 {xOffset + (int) (r_next * cos(theta + deltaTheta)), 
+      yOffset + (int) (r_next * sin(theta + deltaTheta)),
+      p.color, p.lineWidth};
+
     this->drawLine(p1, p2);
   }
-
-
 }
