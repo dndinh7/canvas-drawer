@@ -15,118 +15,137 @@
 
 namespace agl
 {
-   struct Point {
-      int x;
-      int y;
-      Pixel color;
-      int lineWidth;
-   };
+  struct Point {
+    int x;
+    int y;
+    Pixel color;
+    int lineWidth;
+  };
 
-   enum PrimitiveType {UNDEFINED, LINES, TRIANGLES, CIRCLES, ROSE};
+  struct FlowField {
+    std::vector<float> field;
+    int resolution;
+    int min_x;
+    int max_x;
+    int min_y;
+    int max_y;
+    int nRows;
+    int nCols;
+    int numSteps;
+    int step_length;
+  };
 
-   class Canvas
-   {
-   public:
-      Canvas(int w, int h);
-      virtual ~Canvas();
+  enum PrimitiveType {UNDEFINED, LINES, TRIANGLES, CIRCLES, ROSE, FLOW};
 
-      // Save to file
-      void save(const std::string& filename);
+  class Canvas
+  {
+  public:
+    Canvas(int w, int h);
+    virtual ~Canvas();
 
-      // Draw primitives with a given type (either LINES or TRIANGLES)
-      // For example, the following draws a red line followed by a green line
-      // begin(LINES);
-      //    color(255,0,0);
-      //    vertex(0,0);
-      //    vertex(100,0);
-      //    color(0,255,0);
-      //    vertex(0, 0);
-      //    vertex(0,100);
-      // end();
-      void begin(PrimitiveType type);
-      void end();
+    // Save to file
+    void save(const std::string& filename);
 
-      // Specify a vertex at raster position (x,y)
-      // x corresponds to the column; y to the row
-      void vertex(int x, int y);
+    // Draw primitives with a given type (either LINES or TRIANGLES)
+    // For example, the following draws a red line followed by a green line
+    // begin(LINES);
+    //    color(255,0,0);
+    //    vertex(0,0);
+    //    vertex(100,0);
+    //    color(0,255,0);
+    //    vertex(0, 0);
+    //    vertex(0,100);
+    // end();
+    void begin(PrimitiveType type);
+    void end();
 
-      // Specify a circle's radius
-      void radius(int r);
+    // Specify a vertex at raster position (x,y)
+    // x corresponds to the column; y to the row
+    void vertex(int x, int y);
 
-      // Specify a width
-      void width(int w);
+    // Specify a circle's radius
+    void radius(int r);
 
-      // Specify number of petals
-      void petals(int num);
+    // Specify a width
+    void width(int w);
 
-      // Specify a color. Color components are in range [0,255]
-      void color(unsigned char r, unsigned char g, unsigned char b);
+    // Specify number of petals
+    void petals(int num);
 
-      // Fill the canvas with the given background color
-      void background(unsigned char r, unsigned char g, unsigned char b);
+    // Specify a color. Color components are in range [0,255]
+    void color(unsigned char r, unsigned char g, unsigned char b);
 
-      // Bresenham's line algorithm
-      void drawLine(Point& p1, Point& p2);
+    // Fill the canvas with the given background color
+    void background(unsigned char r, unsigned char g, unsigned char b);
 
-      // Draws a triangle from three points, this might
-      // change the parameters (which will be cleared anyway if drawn)
-      void drawTriangle(Point& p0, Point& p1, Point& p2);
+    // Bresenham's line algorithm
+    void drawLine(Point& p1, Point& p2);
 
-      // Interpolates pixel colors with a given alpha
-      static Pixel interpolateColor(const Pixel& p1, const Pixel& p2, float alpha);
+    // Draws a triangle from three points, this might
+    // change the parameters (which will be cleared anyway if drawn)
+    void drawTriangle(Point& p0, Point& p1, Point& p2);
 
-      /* Computes if the otherPt is on the same line as the two points or not.
-       * Returns a positive number if the otherPt is above the line
-       * and a negative number if the otherPt is below the line.
-       * I chose to do it in this style, so it can take offscreen floating points
-      */
-      static float implicitLineFn(float linePt1_x, float linePt1_y, 
-         float linePt2_x, float linePt2_y, 
-         float otherPt_x, float otherPt_y);
+    // Interpolates pixel colors with a given alpha
+    static Pixel interpolateColor(const Pixel& p1, const Pixel& p2, float alpha);
 
-      /**
-       * Finds the box that bounds the vector of given points.
-       * The values will be returned in the passed references.
-       */
-      static void findBoundingBox(const Point& p0, const Point& p1, const Point& p2,
-        int& x_min, int& y_min, int& x_max, int& y_max);
+    /* Computes if the otherPt is on the same line as the two points or not.
+      * Returns a positive number if the otherPt is above the line
+      * and a negative number if the otherPt is below the line.
+      * I chose to do it in this style, so it can take offscreen floating points
+    */
+    static float implicitLineFn(float linePt1_x, float linePt1_y, 
+      float linePt2_x, float linePt2_y, 
+      float otherPt_x, float otherPt_y);
 
-      /**
-       * This method rearranges the points, so that
-       * p0 -> p1 -> p2 goes in CCW orientation.
-       * 
-      */
-      static void rearrangeCCW(Point& p0, Point& p1, Point& p2);
+    /**
+     * Finds the box that bounds the vector of given points.
+     * The values will be returned in the passed references.
+     */
+    static void findBoundingBox(const Point& p0, const Point& p1, const Point& p2,
+      int& x_min, int& y_min, int& x_max, int& y_max);
 
-      /**
-       * Draws a circle at point p
-      */
-      void drawCircle(const Point& p, int radius);
+    /**
+     * This method rearranges the points, so that
+     * p0 -> p1 -> p2 goes in CCW orientation.
+     * 
+    */
+    static void rearrangeCCW(Point& p0, Point& p1, Point& p2);
 
-      /**
-       * Draws a rose at point p
-      */
-     void drawRose(const Point& p, int radius, int numPetals);
+    /**
+     * Draws a circle at point p
+    */
+    void drawCircle(const Point& p, int radius);
+
+    /**
+     * Draws a rose at point p
+    */
+    void drawRose(const Point& p, int radius, int numPetals);
+
+    /**
+     * Draws a flow at point p
+    */
+    void drawFlow(Point& p);
 
 
-   private:
-      // Helper functions for drawLine, so that they can 
-      // use _canvas without passing it as a parameter
-      void _drawLineLow(const Point& p1, const Point& p2);
-      void _drawLineHigh(const Point& p1, const Point& p2);
 
-      Image _canvas;
-      PrimitiveType currentType;
-      Pixel currentColor;
-      std::vector<Point> myPoints;
-      std::vector<int> myRadii;
-      std::vector<int> myNumPetals;
-      std::vector<float> flowField;
-      int currentRadius= 1;
-      int currentLineWidth= 1;
-      int currentNumPetals= 1;
+  private:
+    // Helper functions for drawLine, so that they can 
+    // use _canvas without passing it as a parameter
+    void _drawLineLow(const Point& p1, const Point& p2);
+    void _drawLineHigh(const Point& p1, const Point& p2);
 
-   };
+    Image _canvas;
+    PrimitiveType currentType;
+    Pixel currentColor;
+    std::vector<Point> myPoints;
+    std::vector<int> myRadii;     // determines the radius of circle points
+    std::vector<int> myNumPetals; // determines number of petals
+    FlowField flowField;
+    int currentRadius= 1;
+    int currentLineWidth= 1;
+    int currentNumPetals= 1;
+
+  };
 }
 
 #endif

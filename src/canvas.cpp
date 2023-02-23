@@ -20,13 +20,36 @@ int clamp(int value, int low, int hi) {
 
 Canvas::Canvas(int w, int h) : _canvas(w, h)
 {
-  this->flowField= std::vector<float>(w*h);
-  for (int i= 0; i < this->_canvas.width(); i++) {
-    for (int j= 0; j < this->_canvas.height(); i++) {
-      
+  // Allow for a 50% buffer if lines were to loop back
+  this->flowField.min_x= (int) (w * -0.5f);
+  this->flowField.max_x= (int) (w * 1.5f);
+  this->flowField.min_y= (int) (h * -0.5f);
+  this->flowField.max_y= (int) (h * 1.5f);
+
+
+  // this will be the spacing between each angle in the flow field
+  this->flowField.resolution= (int) (w * 0.01f);
+
+  // based on the resolution
+  this->flowField.nRows= (this->flowField.max_y - this->flowField.min_y)
+    / this->flowField.resolution;
+
+  this->flowField.nCols= (this->flowField.max_x - this->flowField.min_x) 
+    / this->flowField.resolution;
+
+  this->flowField.field= std::vector<float>(this->flowField.nRows * 
+    this->flowField.nCols);
+
+  float angle= 0.25f * M_PI;
+
+  for (int y= 0; y < this->flowField.nRows; y++) {
+    for (int x= 0; x < this->flowField.nCols; x++) {
+      this->flowField.field[y * this->flowField.nCols + x]= angle;
     }
   }
 
+  this->flowField.numSteps= (int) (this->_canvas.height() * 0.5);
+  this->flowField.step_length= (int) (this->_canvas.width() * 0.005);
 }
 
 Canvas::~Canvas()
@@ -93,6 +116,12 @@ void Canvas::end()
 
       for (int i= 0; i < n; i++) {
         this->drawRose(this->myPoints[i], this->myRadii[i], this->myNumPetals[i]);
+      }
+      break;
+    case FLOW:
+
+      for (Point p: this->myPoints) {
+        this->drawFlow(p);
       }
       break;
   }
@@ -201,7 +230,6 @@ void Canvas::vertex(int x, int y)
   if (this->currentType == ROSE) {
     this->myNumPetals.push_back(this->currentNumPetals);
   }
-  
 }
 
 void Canvas::color(unsigned char r, unsigned char g, unsigned char b)
@@ -349,6 +377,37 @@ void Canvas::drawRose(const Point& p, int radius, int numPetals) {
     Point p2 {xOffset + (int) (r_next * cos(theta + deltaTheta)), 
       yOffset + (int) (r_next * sin(theta + deltaTheta)),
       p.color, p.lineWidth};
+
+    this->drawLine(p1, p2);
+  }
+}
+
+void Canvas::drawFlow(Point& p) {
+
+
+  Point p1= p;
+  Point p2= p;
+  for (int i= 0; i < this->flowField.numSteps; i++) {
+    p1= p2;
+
+    // offset for the angle flow field
+    int x_offset= p1.x - this->flowField.min_x;
+    int y_offset= p1.y - this->flowField.min_y;
+
+    int x_flow_idx= (int) (x_offset / this->flowField.resolution);
+    int y_flow_idx= (int) (y_offset / this->flowField.resolution);
+
+    
+    // get the angle and clamp the idx
+    float angle= this->flowField.field[clamp(y_flow_idx * 
+      this->flowField.nCols + x_flow_idx, 0,
+      this->flowField.nCols * this->flowField.nRows - 1)];
+
+
+    int x_step= this->flowField.step_length * cos(angle);
+    int y_step= this->flowField.step_length * sin(angle);
+
+    p2= Point {p1.x + x_step, p1.y + y_step, p1.color, p1.lineWidth};
 
     this->drawLine(p1, p2);
   }

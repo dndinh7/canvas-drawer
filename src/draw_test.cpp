@@ -164,5 +164,15 @@ int main(int argc, char** argv)
    drawer.end();
    drawer.save("5-petal.png");
 
+   Canvas canvas(1000, 1000);
+
+   // draw a curved line in the flow field
+   canvas.background(255, 255, 255);
+   canvas.begin(FLOW);
+   canvas.color(0,0,0);
+   canvas.vertex(500, 100);
+   canvas.end();
+   canvas.save("flow-test.png");
+
    return 0;
 }
