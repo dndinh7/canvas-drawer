@@ -316,18 +316,20 @@ void Canvas::drawLine(Point& p1, Point& p2) {
   int canvasWidth= this->_canvas.width()-1;
   int canvasHeight= this->_canvas.height()-1;
 
-  if ((p1.x < 0 && p2.x < 0) ||
-    (p1.y < 0 && p2.y < 0) ||
-    (p1.x > canvasWidth && p2.x > canvasWidth) ||
-    (p1.y > canvasHeight && p2.y > canvasHeight)) {
-      // do not want to draw a line that is completely off the screen
-      return;
-    }
+  // if a points is off screen, then we don't want to draw the line
+  if (((p1.x < 0 || p1.x > canvasWidth) || (p1.y < 0 || p1.y > canvasHeight)) ||
+      ((p2.x < 0 || p2.x > canvasWidth) || (p2.y < 0 || p2.y > canvasHeight))) {
+    return;
+  }
 
+  // clamping made it so there were multiple draws on the borders
+/*  
   p1.x= clamp(p1.x, 0, canvasWidth);
   p1.y= clamp(p1.y, 0, canvasHeight);
   p2.x= clamp(p2.x, 0, canvasWidth);
   p2.y= clamp(p2.y, 0, canvasHeight);
+*/
+  
 
   // so that we can draw to the boundaries if the point
   // is off the screen
@@ -623,7 +625,7 @@ void Canvas::packCircles(std::vector<Point>& polygon, std::vector<Pixel>& palett
       // generates random color and radius
       cur_color= palette[rand() % palette_size];
       cur_radius= rand() % max_radius;
-      
+
       // determines if circle is in polygon or not
       bool inPolygon= false;   
 
