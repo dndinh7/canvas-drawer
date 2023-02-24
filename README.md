@@ -65,7 +65,8 @@ Circle:
 
 Roses:
 
-![roses](https://user-images.githubusercontent.com/72237791/221095265-deb8d96a-dd14-4b61-b48d-1b0bea9d9f18.png)
+![roses](https://user-images.githubusercontent.com/72237791/221096656-6835b5b1-87cc-41a1-9480-aed6c7438737.png)
+
 
 
 Flow (Perlin Noise):
