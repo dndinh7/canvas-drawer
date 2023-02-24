@@ -169,14 +169,31 @@ int main(int argc, char** argv)
    canvas.background(255, 255, 255);
    canvas.begin(POLYGON);
 
-   canvas.vertex(175, 175);
+   canvas.vertex(250, 250);
    canvas.vertex(250, 750);
    canvas.vertex(750, 750);
    canvas.vertex(750, 250);
+   canvas.vertex(500, 0);
    
    canvas.palette(palette);
    canvas.end();
-   canvas.save("circle-quad.png");
+   canvas.save("circle-pentagon.png");
+
+   canvas.background(0, 0, 0);
+   canvas.begin(POLYGON);
+   canvas.vertex(123, 32);
+   canvas.vertex(43, 32);
+   canvas.vertex(732, 90);
+   canvas.vertex(574, 341);
+   canvas.vertex(999, 999);
+   canvas.vertex(1, 1000);
+   canvas.vertex(483, 493);
+   canvas.vertex(678, 12);
+   canvas.vertex(657, 439);
+
+   canvas.palette(palette);
+   canvas.end();
+   canvas.save("circle-random-9-vertex.png");
 
    canvas.background(0, 0, 0);
    canvas.begin(ROSES);
