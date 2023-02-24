@@ -120,7 +120,7 @@ Using the circle packing algorithm
 
 ![circle-triangle](https://user-images.githubusercontent.com/72237791/221095517-65d82bec-dccf-4923-b7cd-83d2f8766e0e.png)
 
-![circle-triangle](https://user-images.githubusercontent.com/72237791/221104743-443eb73d-3162-4d4a-bca9-c96d2a84460e.png)
+![circ-triangle](https://user-images.githubusercontent.com/72237791/221104954-d753cbde-6498-40d0-91b2-0f7d11becc21.png)
 
 ![circle-pentagon](https://user-images.githubusercontent.com/72237791/221104768-922c11b0-2c29-4a34-80ea-e27633bc8e04.png)
 
