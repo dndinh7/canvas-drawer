@@ -2,16 +2,6 @@
 
 Implements a simple drawing api
 
-This program supports drawing lines, triangles, circles, roses with n (if odd) or 2n (if even) number of petals, flow field curves using perlin noise, additive blending, and alpha blending.
-
-- Draw lines by specifying LINES type and specifying two points
-- Draw triangles by specifying TRIANGLES type and specifying three points
-- Draw circles by specifiying CIRCLES type and specifying a point and radius
-- Draw roses by specifying ROSES type and specifying a point, number of petals, and radius
-- Draw a flow field by specifying FLOW and specifying vertices
-- Fill a polygon with circles by specifying POLYGON and specifying vertices and a palette
-- OPTIONAL: specify blending type when also beginning drawing
-
 
 ## How to build
 
@@ -54,7 +44,15 @@ canvas-drawer/build $ ../bin/draw_art
 
 ## Supported primitives
 
-TODO: Document the custom primitives supported by your canvas class
+This program supports drawing lines, triangles, circles, roses with n (if odd) or 2n (if even) number of petals, flow field curves using perlin noise, additive blending, and alpha blending.
+
+- Draw lines by specifying LINES type and specifying two points
+- Draw triangles by specifying TRIANGLES type and specifying three points
+- Draw circles by specifiying CIRCLES type and specifying a point and radius
+- Draw roses by specifying ROSES type and specifying a point, number of petals, and radius
+- Draw a flow field by specifying FLOW and specifying vertices
+- Fill a polygon with circles by specifying POLYGON and specifying vertices and a palette
+- OPTIONAL: specify blending type when also beginning drawing
 
 ## Results
 
