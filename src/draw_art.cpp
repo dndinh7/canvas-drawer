@@ -176,7 +176,7 @@ int main(int argc, char** argv)
    
    canvas.palette(palette);
    canvas.end();
-   canvas.save("circle-pentagon.png");
+   canvas.save("circle-quad.png");
 
    canvas.background(0, 0, 0);
    canvas.begin(ROSES);
