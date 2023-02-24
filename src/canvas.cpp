@@ -702,7 +702,7 @@ void Canvas::drawRose(const Point& p, int radius, int numPetals) {
   int xOffset= p.x;
   int yOffset= p.y;
 
-  for (float theta= 0.0f; theta < 2 * M_PI - deltaTheta; theta+= deltaTheta) {
+  for (float theta= 0.0f; theta < 2 * M_PI; theta+= deltaTheta) {
     float r_cur= radius * cos(theta*numPetals);
     float r_next= radius * cos((theta+deltaTheta)*numPetals);
 
