@@ -581,7 +581,7 @@ bool Canvas::polygonContainsPoint(std::vector<Point>& polygon, const Point& test
     Point p1= polygon[i];
     Point p2= polygon[j];
     float deltaX= p2.x - p1.x;
-    float ySpread= testPoint.y - p1.x;
+    float ySpread= testPoint.y - p1.y;
     float deltaY= p2.y - p1.y;
     if (((p1.y > testPoint.y) != (p2.y > testPoint.y)) &&
       (testPoint.x < (((deltaX * ySpread) / deltaY) + p1.x))) {
@@ -746,24 +746,5 @@ void Canvas::drawFlow(Point& p) {
 
     this->drawLine(p1, p2);
   }
-  
-
-/*
-  int width= this->_canvas.width();
-  int height= this->_canvas.height();
-  for (int y= 0; y < height; y++) {
-    for (int x= 0; x < width; x++) {
-      float ratio_x= x/(float)width;
-      float ratio_y= y/(float)height;
-      int real_x= ratio_x * this->flowField.nCols;
-      int real_y= ratio_y * this->flowField.nRows;
-      float angle= this->flowField.field[real_y * this->flowField.nCols + real_x];
-
-      Pixel p {(unsigned char) (angle/(2*M_PI) * 255), (unsigned char) (angle/(2*M_PI) * 255), (unsigned char) (angle/(2*M_PI) * 255)};
-      //cout << "pixel: " << (int)p.r << ", " << (int)p.g << ", " << (int)p.b << endl;
-      this->_colorPixel(x, y, p);
-    }
-  }
-  */
 
 }
