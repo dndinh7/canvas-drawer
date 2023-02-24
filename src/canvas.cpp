@@ -148,8 +148,9 @@ Canvas::Canvas(int w, int h) : _canvas(w, h)
     }
   }
 
-  this->flowField.numSteps= (int) ceil(this->_canvas.height() * 0.50);
-  this->flowField.step_length= (int) ceil(this->_canvas.width() * 0.01);
+  // this will determine the length of each curve
+  this->flowField.numSteps= (int) ceil(this->_canvas.height() * 0.1);
+  this->flowField.stepLength= (int) ceil(this->_canvas.width() * 0.01);
 }
 
 Canvas::~Canvas()
@@ -237,6 +238,7 @@ void Canvas::end()
         break;
       }
       this->packCircles(this->myPoints, this->myPalette);
+      break;
   }
   this->currentPrimitiveType= UNDEFINED;
   this->currentBlendType= REPLACE;
@@ -244,6 +246,25 @@ void Canvas::end()
   this->myRadii.clear();
   this->myNumPetals.clear();
   this->myPalette.clear();
+}
+
+
+void Canvas::numSteps(int steps)
+{
+  if (this->currentPrimitiveType == FLOW) {
+    this->flowField.numSteps= steps;
+  } else {
+    cout << "Cannot change numSteps of flow field when type is not FLOW" << endl;
+  }
+}
+
+void Canvas::stepLength(int length) 
+{
+  if (this->currentPrimitiveType == FLOW) {
+    this->flowField.stepLength= length;
+  } else {
+    cout << "Cannot change stepLength of flow field when type is not FLOW" << endl;
+  }
 }
 
 // drawLine helper function for when |H| > |W|
@@ -322,18 +343,6 @@ void Canvas::drawLine(Point& p1, Point& p2) {
     return;
   }
 
-  // clamping made it so there were multiple draws on the borders
-/*  
-  p1.x= clamp(p1.x, 0, canvasWidth);
-  p1.y= clamp(p1.y, 0, canvasHeight);
-  p2.x= clamp(p2.x, 0, canvasWidth);
-  p2.y= clamp(p2.y, 0, canvasHeight);
-*/
-  
-
-  // so that we can draw to the boundaries if the point
-  // is off the screen
-
   if (std::abs(H) < std::abs(W)) {
     // swap, so we go in the positive x-direction
     if (p1.x > p2.x) this->_drawLineLow(p2, p1);
@@ -385,7 +394,7 @@ void Canvas::radius(int r)
   if (this->currentPrimitiveType == CIRCLES || this->currentPrimitiveType == ROSES) {
     this->currentRadius= r;
   } else {
-    cout << "Cannot set radius when the type is not CIRCLES or ROSESS" << endl;
+    cout << "Cannot set radius when the type is not CIRCLES or ROSES" << endl;
   }
 }
 
@@ -394,10 +403,22 @@ void Canvas::petals(int num)
   if (this->currentPrimitiveType == ROSES) {
     this->currentNumPetals= num;
   } else {
-    cout << "Cannot set petals when the type is not ROSESS" << endl;
+    cout << "Cannot set petals when the type is not ROSES" << endl;
   }
 }
 
+void Canvas::alpha(float alpha)
+{
+  if (this->currentBlendType == ALPHA) {
+    if (alpha < 0.0f || alpha > 1.0f) {
+      cout << "alpha needs to be between 0 and 1" << endl;
+    } else {
+      this->currentAlpha= alpha;
+    }
+  } else {
+    cout << "Cannot set alpha when the blend type is not ALPHA" << endl;
+  }
+}
 
 void Canvas::background(unsigned char r, unsigned char g, unsigned char b)
 {
@@ -718,8 +739,8 @@ void Canvas::drawFlow(Point& p) {
       this->flowField.nCols * this->flowField.nRows - 1)];
 
 
-    int x_step= this->flowField.step_length * cos(angle);
-    int y_step= this->flowField.step_length * sin(angle);
+    int x_step= this->flowField.stepLength * cos(angle);
+    int y_step= this->flowField.stepLength * sin(angle);
 
     p2= Point {p1.x + x_step, p1.y + y_step, p1.color};
 

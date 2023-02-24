@@ -35,7 +35,7 @@ namespace agl
     int nRows;
     int nCols;
     int numSteps;
-    int step_length;
+    int stepLength;
   };
 
   class Canvas
@@ -67,6 +67,9 @@ namespace agl
     // x corresponds to the column; y to the row
     void vertex(int x, int y);
 
+    // Specify the alpha for alpha blending
+    void alpha(float alpha);
+
     // Specify a circle's radius
     void radius(int r);
 
@@ -81,6 +84,16 @@ namespace agl
 
     // Fill the canvas with the given background color
     void background(unsigned char r, unsigned char g, unsigned char b);
+
+    // WARNING: the next two methods will change the
+    // the curves of the flow field drawing...
+    // changing it may cause errors...
+    
+    // Specify a flow field's numSteps
+    void numSteps(int steps);
+    
+    // Specify a flow field's stepLength
+    void stepLength(int length);
 
     // Bresenham's line algorithm
     void drawLine(Point& p1, Point& p2);
@@ -134,12 +147,6 @@ namespace agl
      * Draws a flow at point p
     */
     void drawFlow(Point& p);
-
-    /**
-     * Creates a noise value from two values
-     * 
-     */
-    static float noise(float x, float y);
 
     /**
      * Maps a value in a range [start, end],
