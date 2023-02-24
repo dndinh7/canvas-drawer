@@ -169,7 +169,7 @@ int main(int argc, char** argv)
    canvas.background(255, 255, 255);
    canvas.begin(POLYGON);
 
-   canvas.vertex(100, 100);
+   canvas.vertex(175, 175);
    canvas.vertex(250, 750);
    canvas.vertex(750, 750);
    canvas.vertex(750, 250);
@@ -202,6 +202,7 @@ int main(int argc, char** argv)
    canvas.vertex(791, 791);
    canvas.end();
    canvas.save("roses.png");
+
 
 
 }

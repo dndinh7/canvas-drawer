@@ -1,9 +1,11 @@
 /*-----------------------------------------------
  * Author: David Dinh
- * Date: 16 February 2023
+ * Date: 23 February 2023
  * Description: This program allows the user
  * to create their own canvas and currently
- * draw lines and triangles.
+ * draw lines, triangles, roses of n (if odd) or 2n petals,
+ * circles, flow field using perlin noise, and additive and
+ * alpha blending.
  ----------------------------------------------*/
 
 #ifndef canvas_H_
@@ -88,7 +90,7 @@ namespace agl
     // WARNING: the next two methods will change the
     // the curves of the flow field drawing...
     // changing it may cause errors...
-    
+
     // Specify a flow field's numSteps
     void numSteps(int steps);
     
