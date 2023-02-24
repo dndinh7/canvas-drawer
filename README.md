@@ -122,6 +122,8 @@ Using the circle packing algorithm
 
 ![circle-quad](https://user-images.githubusercontent.com/72237791/221095533-6d9fd0ae-65fb-4156-9183-b764b13af870.png)
 
+![pack-circle-polygon](https://user-images.githubusercontent.com/72237791/221097423-b9b60a6e-b00e-4d84-8d64-6bf88ef256f1.png)
+
 
 
 
