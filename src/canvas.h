@@ -17,13 +17,12 @@ namespace agl
 {
   enum BlendType { ALPHA, ADD, REPLACE };
 
-  enum PrimitiveType {UNDEFINED, LINES, TRIANGLES, CIRCLES, ROSE, FLOW};
+  enum PrimitiveType {UNDEFINED, LINES, TRIANGLES, CIRCLES, ROSES, FLOW, POLYGON};
 
   struct Point {
     int x;
     int y;
     Pixel color;
-    int lineWidth;
   };
 
   struct FlowField {
@@ -71,11 +70,11 @@ namespace agl
     // Specify a circle's radius
     void radius(int r);
 
-    // Specify a line width
-    void lineWidth(int w);
-
     // Specify number of petals
     void petals(int num);
+
+    // Specify a palette
+    void palette(std::vector<Pixel> palette);
 
     // Specify a color. Color components are in range [0,255]
     void color(unsigned char r, unsigned char g, unsigned char b);
@@ -106,7 +105,7 @@ namespace agl
      * Finds the box that bounds the vector of given points.
      * The values will be returned in the passed references.
      */
-    static void findBoundingBox(const Point& p0, const Point& p1, const Point& p2,
+    static void findBoundingBox(std::vector<Point>& points,
       int& x_min, int& y_min, int& x_max, int& y_max);
 
     /**
@@ -122,6 +121,11 @@ namespace agl
     void drawCircle(const Point& p, int radius);
 
     /**
+     * Fills the polygon with different sized circles
+    */
+    void packCircles(std::vector<Point>& polygon, std::vector<Pixel>& palette);
+
+    /**
      * Draws a rose at point p
     */
     void drawRose(const Point& p, int radius, int numPetals);
@@ -131,7 +135,25 @@ namespace agl
     */
     void drawFlow(Point& p);
 
+    /**
+     * Creates a noise value from two values
+     * 
+     */
+    static float noise(float x, float y);
 
+    /**
+     * Maps a value in a range [start, end],
+     * to a new range [newStart, newEnd]
+     */
+    static float mapValue(float value, float start, float end, float newStart, float newEnd);
+
+    /**
+     * Returns whether the point is in the polygon or not
+    */
+    static bool polygonContainsPoint(std::vector<Point>& polygon, const Point& testPoint);
+
+    // Returns whether two circles are colliding
+    static bool collision(const Point& p1, int r1, const Point& p2, int r2);
 
   private:
     // Helper functions for drawLine, so that they can 
@@ -143,17 +165,19 @@ namespace agl
     // based on the blend type
     void _colorPixel(int x, int y, const Pixel& p);
 
+
+
     Image _canvas;
     PrimitiveType currentPrimitiveType= UNDEFINED;
     Pixel currentColor;
     std::vector<Point> myPoints;
     std::vector<int> myRadii;     // determines the radius of circle points
     std::vector<int> myNumPetals; // determines number of petals
+    std::vector<Pixel> myPalette;   // palette for packing circles
     FlowField flowField;
     BlendType currentBlendType= REPLACE;
     int currentRadius= 1;
-    int currentLineWidth= 1;
-    int currentNumPetals= 1;
+    int currentNumPetals= 1; // for rose curve
     float currentAlpha= 0.0f;
 
   };
