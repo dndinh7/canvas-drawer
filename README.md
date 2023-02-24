@@ -120,9 +120,19 @@ Using the circle packing algorithm
 
 ![circle-triangle](https://user-images.githubusercontent.com/72237791/221095517-65d82bec-dccf-4923-b7cd-83d2f8766e0e.png)
 
-![circle-quad](https://user-images.githubusercontent.com/72237791/221095533-6d9fd0ae-65fb-4156-9183-b764b13af870.png)
+![circ-triangle](https://user-images.githubusercontent.com/72237791/221104954-d753cbde-6498-40d0-91b2-0f7d11becc21.png)
 
-![pack-circle-polygon](https://user-images.githubusercontent.com/72237791/221097423-b9b60a6e-b00e-4d84-8d64-6bf88ef256f1.png)
+![circle-pentagon](https://user-images.githubusercontent.com/72237791/221104768-922c11b0-2c29-4a34-80ea-e27633bc8e04.png)
+
+![circle-random-9-vertex](https://user-images.githubusercontent.com/72237791/221104806-426bc895-cd08-45f1-a496-a3a217f7238c.png)
+
+![pack-circle-polygon](https://user-images.githubusercontent.com/72237791/221104830-3a0818e2-b282-44a6-87bf-1e16710a88ed.png)
+
+
+
+
+
+
 
 
 
